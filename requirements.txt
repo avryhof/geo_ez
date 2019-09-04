@@ -1,0 +1,5 @@
+bleach
+django
+future
+requests
+xmltodict
