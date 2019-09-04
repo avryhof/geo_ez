@@ -7,7 +7,7 @@ import pprint
 import requests
 from future.standard_library import install_aliases
 
-from gis.data_functions import convert_keys
+from geo_ez.data_functions import convert_keys
 
 install_aliases()
 

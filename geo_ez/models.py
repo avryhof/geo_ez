@@ -3,9 +3,9 @@ from math import radians, cos, sin, asin, sqrt
 from django.db import models
 from django.db.models import DO_NOTHING
 
-from gis.constants import ACCURACY_CHOICES
-from gis.us_census_class import USCensus
-from gis.usps_class import USPS
+from geo_ez.constants import ACCURACY_CHOICES
+from geo_ez.us_census_class import USCensus
+from geo_ez.usps_class import USPS
 
 
 class GISPoint(models.Model):

@@ -10,7 +10,7 @@ from urllib.request import urlretrieve
 from django.conf import settings
 from django.core.management.base import BaseCommand
 
-from gis.utility_functions import import_postal_codes_csv
+from geo_ez.utility_functions import import_postal_codes_csv
 
 logger = logging.getLogger(__name__)
 

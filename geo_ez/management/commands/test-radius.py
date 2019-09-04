@@ -7,8 +7,8 @@ import math
 from django.conf import settings
 from django.core.management.base import BaseCommand
 
-from gis.models import PostalCode
-from gis.utility_functions import points_within_radius
+from geo_ez.models import PostalCode
+from geo_ez.utility_functions import points_within_radius
 
 logger = logging.getLogger(__name__)
 

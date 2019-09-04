@@ -4,7 +4,7 @@ import datetime
 from django.db.models.expressions import RawSQL
 from django.utils.timezone import make_aware
 
-from gis.models import PostalCode
+from geo_ez.models import PostalCode
 
 
 def points_within_radius(gismodel, latitude, longitude, **kwargs):
