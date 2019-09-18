@@ -1,3 +1,5 @@
+This package is still in early pre-alpha stages.  Meanwhile, feel free to use the models, and functionality, but you will probably need to coerce them into working how you want them to for some cases.
+
 # Geo EZ
 ```bash
 pip install geo_ez
