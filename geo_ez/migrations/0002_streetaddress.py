@@ -25,7 +25,7 @@ class Migration(migrations.Migration):
                 ('zip_code', models.CharField(blank=True, max_length=20, null=True)),
                 ('plus_four', models.CharField(blank=True, max_length=20, null=True)),
                 ('validated', models.BooleanField(default=False)),
-                ('postal_code', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.DO_NOTHING, to='gis.PostalCode')),
+                ('postal_code', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.DO_NOTHING, to='geo_ez.PostalCode')),
             ],
             options={
                 'abstract': False,
