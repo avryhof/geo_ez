@@ -5,7 +5,7 @@ from setuptools import setup
 
 github_user = "avryhof"
 github_repo_name = "geo_ez"
-module_path = "gis"
+module_path = "geo_ez"
 author = "Amos Vryhof"
 author_email = "amos@vryhofresearch.com"
 description = "Tools for building geographically aware django apps, without needing to install a real GIS backend."
@@ -40,7 +40,7 @@ setup(
     author=author,
     author_email=author_email,
     description=description,
-    long_description=read("README.md"),
+    long_description="",
     include_package_data=True,
     package_data={"": ["LICENSE"]},
     zip_safe=False,

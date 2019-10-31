@@ -5,11 +5,8 @@ import os
 import pprint
 
 import requests
-from future.standard_library import install_aliases
 
 from geo_ez.data_functions import convert_keys
-
-install_aliases()
 
 logger = logging.getLogger(__name__)
 
@@ -124,7 +121,7 @@ class USCensus:
 
                 if isinstance(result, dict):
                     address_matches = result.get("addressMatches")
-                    if len(address_matches) > 0:
+                    if address_matches and len(address_matches) > 0:
                         address_match = address_matches[0]
 
                         return_address = convert_keys(address_match.get("addressComponents"))

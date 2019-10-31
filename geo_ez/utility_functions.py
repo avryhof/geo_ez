@@ -1,10 +1,98 @@
 import csv
 import datetime
+import math
 
+import bleach
 from django.db.models.expressions import RawSQL
 from django.utils.timezone import make_aware
 
 from geo_ez.models import PostalCode
+from geo_ez.us_census_class import USCensus
+from geo_ez.usps_class import USPS
+
+
+def geocode(address_dict, **kwargs):
+    address_normalized = kwargs.get("normalized", False)
+
+    search_address = dict(
+        address1=address_dict.get("address1"),
+        address2=address_dict.get("address2"),
+        city=address_dict.get("city"),
+        state=address_dict.get("state"),
+        zip_code=address_dict.get("zip_code"),
+    )
+
+    if not address_normalized:
+        # First, we normalize the address with the US Postal Service
+        ps = USPS()
+        valid_address = ps.address(**search_address)
+    else:
+        valid_address = search_address
+
+    usc = USCensus()
+
+    return usc.geocode(query=valid_address)
+
+
+def miles_to_km(miles):
+    return miles * 1.60934
+
+
+def km_to_miles(km):
+    return km * 0.621371
+
+
+def deg2rad(deg):
+    return deg * (math.pi / 180)
+
+
+def get_distance(lat1, lon1, lat2, lon2, **kwargs):
+    use_miles = kwargs.get("use_miles", True)
+
+    lat1 = float(lat1)
+    lat2 = float(lat2)
+    lon1 = float(lon1)
+    lon2 = float(lon2)
+
+    radius = 6371  # Radius of the earth in km
+
+    d_lat = deg2rad(lat2 - lat1)  # deg2rad below
+    d_lon = deg2rad(lon2 - lon1)
+
+    a = math.sin(d_lat / 2) * math.sin(d_lat / 2) + math.cos(deg2rad(lat1)) * math.cos(deg2rad(lat2)) * math.sin(
+        d_lon / 2
+    ) * math.sin(d_lon / 2)
+    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+    distance = radius * c  # Distance in km
+
+    if not use_miles:
+        return_value = distance
+    else:
+        return_value = km_to_miles(distance)
+
+    return return_value
+
+
+def get_postal_code_by_coords(latitude, longitude):
+    """
+    Finds the nearest postal code to the provided coordinates.
+
+    :param latitude:
+    :param longitude:
+    :return:
+    """
+    retn = None
+    result_count = 0
+    radius = 1
+    while result_count == 0:
+        postal_codes = postal_codes_within_radius(latitude, longitude, radius=radius)
+        result_count = len(postal_codes)
+        if result_count > 0:
+            retn = postal_codes[0]
+            break
+        radius = radius + 1
+
+    return retn
 
 
 def points_within_radius(gismodel, latitude, longitude, **kwargs):
@@ -37,7 +125,7 @@ def postal_codes_within_radius(latitude, longitude, **kwargs):
 def import_postal_codes_csv(data_file_path, **kwargs):
     delimiter = kwargs.get("delimiter", "\t")
 
-    data_file = open(data_file_path, "rU", encoding="utf-8")
+    data_file = open(data_file_path, "rU", encoding="utf8")
 
     rows = csv.reader(data_file, delimiter=delimiter)
 
@@ -87,3 +175,31 @@ def import_postal_codes_csv(data_file_path, **kwargs):
     data_file.close()
 
     PostalCode.objects.bulk_create(insert_list)
+
+
+def zip_codes_in_radius(**kwargs):
+    zip_code = kwargs.get("zip_code", None)
+    radius = kwargs.get("radius", False)
+    distance_units = bleach.clean(kwargs.get("distance_units", "miles"))
+
+    if distance_units.lower() in ["mi", "miles", "imperial", "empirical", "us", "united states", "usa"]:
+        use_miles = True
+
+    starting_zip_code = PostalCode.objects.get(postal_code=zip_code)
+
+    zipcodes_in_radius = points_within_radius(
+        PostalCode, starting_zip_code.latitude, starting_zip_code.longitude, radius=radius, use_miles=True
+    )
+
+    zip_codes = []
+    for zip_code in zipcodes_in_radius:
+        zip_codes.append(
+            {
+                "zip_code": zip_code.postal_code,
+                "distance": round(zip_code.distance, 3),
+                "city": zip_code.place_name,
+                "state": zip_code.admin_code1,
+            }
+        )
+
+    return zip_codes

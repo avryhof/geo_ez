@@ -6,11 +6,8 @@ from collections import OrderedDict
 
 import requests
 import xmltodict
-from future.standard_library import install_aliases
 
 from geo_ez.data_functions import snake_to_camel, http_build_query, clean_api_dict
-
-install_aliases()
 
 logger = logging.getLogger(__name__)
 
