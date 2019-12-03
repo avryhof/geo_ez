@@ -43,6 +43,28 @@ class GISPoint(models.Model):
         return self.distance_from(latitude, longitude, **kwargs) < radius
 
 
+class CountryData(models.Model):
+    iso = models.CharField(primary_key=True, max_length=2, null=False)  # iso country code, 2 characters
+    iso3 = models.CharField(max_length=3, blank=True, null=True)  # iso country code, 3 characters
+    iso_numeric = models.CharField(max_length=3, blank=True, null=True)  # iso numeric country code, 3 characters
+    fips = models.CharField(max_length=5, blank=True, null=True)  # FIPS Code
+    country = models.CharField(max_length=255, blank=True, null=True)
+    capital = models.TextField(blank=True, null=True)
+    area_km = models.BigIntegerField()
+    population = models.BigIntegerField()
+    continent = models.CharField(max_length=10, blank=True, null=True)
+    tld = models.CharField(max_length=10, blank=True, null=True)
+    currency_code = models.CharField(max_length=10, blank=True, null=True)
+    currency_name = models.CharField(max_length=32, blank=True, null=True)
+    phone = models.CharField(max_length=20, blank=True, null=True)
+    postal_code_format = models.CharField(max_length=32, blank=True, null=True)
+    postal_code_ex = models.TextField(blank=True, null=True)
+    languages = models.TextField(blank=True, null=True)
+    geonameid = models.IntegerField()
+    neighbors = models.TextField(blank=True, null=True)
+    equivalent_fips_code = models.CharField(max_length=5, blank=True, null=True)  # FIPS Code
+
+
 class PostalCode(GISPoint):
     country_code = models.CharField(max_length=2, blank=True, null=True)  # iso country code, 2 characters
     postal_code = models.CharField(max_length=20, blank=True, null=True)  # varchar(20)
@@ -179,6 +201,34 @@ class AbstractStreetAddress(GISPoint):
                 self.save()
 
         return valid_address
+
+
+class TimeZone(models.Model):
+    country_code = models.CharField(max_length=2, blank=True, null=True)  # iso country code, 2 characters
+    timezone_id = models.TextField(primary_key=True, null=False)
+    gmt_offset_jan = models.FloatField(null=True)
+    gmt_offset_jul = models.FloatField(null=True)
+    raw_offset = models.FloatField(null=True)
+
+    @property
+    def country(self):
+        try:
+            country = CountryData.objects.get(iso=self.country_code.upper())
+        except CountryData.DoesNotExist:
+            iso_country = countries.get(self.country_code.lower())
+            country = CountryData.objects.create(
+                iso=iso_country.alpha2,
+                iso3=iso_country.alpha3,
+                iso_numeric=iso_country.numeric,
+                country=iso_country.name,
+            )
+
+        return country
+
+
+class TimeZoneMap(models.Model):
+    zip_code = models.CharField(max_length=20, blank=True, null=True)
+    time_zone = models.ForeignKey(TimeZone, null=True, on_delete=DO_NOTHING)
 
 
 class VerifiedStreetAddress(AbstractStreetAddress):

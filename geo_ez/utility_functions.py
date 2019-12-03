@@ -6,9 +6,35 @@ import bleach
 from django.db.models.expressions import RawSQL
 from django.utils.timezone import make_aware
 
+from geo_ez.data_functions import to_dict
 from geo_ez.models import PostalCode
 from geo_ez.us_census_class import USCensus
 from geo_ez.usps_class import USPS
+
+
+def csv_to_dicts(csv_file, **kwargs):
+    encoding = kwargs.pop("encoding", "utf8")
+    has_comments = kwargs.pop("has_comments", False)
+
+    sheet = []
+
+    try:
+        df = open(csv_file, "r", encoding=encoding)
+    except TypeError:
+        df = open(csv_file, "r")
+
+    if has_comments:
+        rows = csv.DictReader(filter(lambda row: row[0] != "#", df), **kwargs)
+
+    else:
+        rows = csv.DictReader(df, **kwargs)
+
+    for row in rows:
+        sheet.append(to_dict(row))
+
+    df.close()
+
+    return sheet
 
 
 def geocode(address_dict, **kwargs):

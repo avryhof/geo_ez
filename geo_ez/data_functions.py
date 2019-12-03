@@ -3,7 +3,8 @@ import re
 from collections import OrderedDict
 
 import bleach
-from future.backports.urllib.parse import quote
+
+from geo_ez.python3_compatibility import compatible_quote
 
 
 def clean_api_dict(input_value):
@@ -102,7 +103,7 @@ def convert_keys(input_value):
 def filter_query_characters(value):
     # Convert to a string, and filter anything that has no business being in a URL
 
-    return quote(str(value))
+    return compatible_quote(str(value))
 
 
 def http_build_query(query_dict):
@@ -116,6 +117,7 @@ def http_build_query(query_dict):
         query_vals.append("%s=%s" % (filter_query_characters(key), filter_query_characters(val)))
 
     return "&".join(query_vals)
+
 
 def snake_to_camel(value, **kwargs):
     """

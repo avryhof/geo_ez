@@ -50,5 +50,5 @@ setup(
         "License :: OSI Approved :: MIT License",
         "Programming Language :: Python :: 3",
     ],
-    install_requires=["bleach", "django", "future", "requests", "xmltodict"],
+    install_requires=["iso3166", "bleach", "django", "requests", "xmltodict"],
 )

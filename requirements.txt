@@ -1,5 +1,5 @@
 bleach
 django
-future
+iso3166
 requests
 xmltodict
