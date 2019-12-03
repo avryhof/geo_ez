@@ -2,6 +2,7 @@ from math import radians, cos, sin, asin, sqrt
 
 from django.db import models
 from django.db.models import DO_NOTHING, DateTimeField
+from iso3166 import countries
 
 from geo_ez.constants import ACCURACY_CHOICES
 from geo_ez.us_census_class import USCensus
@@ -89,6 +90,15 @@ class PostalCode(GISPoint):
     def __str__(self):
         return self.place_name
 
+    @property
+    def timezone(self):
+        try:
+            tz = TimeZoneMap.objects.get(zip_code=self.postal_code)
+        except TimeZoneMap.DoesNotExist:
+            tz = None
+
+        return tz
+
 
 class AbstractStreetAddress(GISPoint):
     address1 = models.CharField(max_length=255, blank=True, null=True)
@@ -111,6 +121,15 @@ class AbstractStreetAddress(GISPoint):
             addr = "%s, %s" % (self.address1, self.address2)
 
         return addr
+
+    @property
+    def timezone(self):
+        try:
+            tz = TimeZoneMap.objects.get(zip_code=self.zip_code)
+        except TimeZoneMap.DoesNotExist:
+            tz = None
+
+        return tz
 
     def dict(self):
         return dict(
