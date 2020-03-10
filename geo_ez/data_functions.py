@@ -1,8 +1,7 @@
+import bleach
 import json
 import re
 from collections import OrderedDict
-
-import bleach
 
 from geo_ez.python3_compatibility import compatible_quote
 

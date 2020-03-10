@@ -1,9 +1,9 @@
 import datetime
 import logging
-import os
-import pprint
 from collections import OrderedDict
 
+import os
+import pprint
 import requests
 import xmltodict
 
@@ -30,11 +30,17 @@ class USPS:
 
         self.today = datetime.datetime.now()
 
+        if not self.usps_id:
+            # log_message("No USPS ID Configured. Please set USPS_ID environmental variable.", custom_log="pharmacy.log")
+            logger.warning("No USPS ID Configured. Please set USPS_ID environmental variable.")
+
     def debug_msg(self, message, **kwargs):
         pretty = kwargs.get("pretty", False)
 
         if pretty:
             message = pprint.pformat(message, indent=4)
+
+        # log_message(message, custom_log="pharmacy.log")
 
         if self.is_debug:
             print(message)
@@ -62,6 +68,7 @@ class USPS:
             request_url = "%s?%s" % (endpoint, http_build_query(params))
 
             ret = requests.get(request_url, verify=True)
+            # pprint.pprint(ret.text)
             self.debug_msg(ret.text)
 
             # Convert the returned XML to a dict, clean the returned data, and convert all keys to snake case.

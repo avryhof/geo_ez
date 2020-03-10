@@ -1,9 +1,9 @@
 import datetime
-import json
 import logging
+
+import json
 import os
 import pprint
-
 import requests
 
 from geo_ez.data_functions import convert_keys
@@ -65,7 +65,7 @@ class USCensus:
         So a resulting benchmark name could be 
             - Public_AR_Current
             - Public_AR_Census2010
-            
+
         Over time, there will always be a 'Current' benchmark.
         It will change as the underlying dataset changes.
         """
@@ -74,10 +74,10 @@ class USCensus:
         """
         A numerical ID or name that references what vintage of geography is desired for the geoLookup. 
         (only needed when returntype = geographies)
-        
+
         A full list of options for a given benchmark can be accessed at 
         https://geocoding.geo.census.gov/geocoder/vintages?benchmark=benchmarkId. 
-        
+
         The general format of the name is GeographyVintage_SpatialBenchmark.
         - The SpatialBenchmark variable should always match the same named variable in what was chosen for 
           the benchmark parameter.
@@ -103,6 +103,8 @@ class USCensus:
 
             if searchtype == "coordinates":
                 param_dict.update(dict(x=query.get("longitude"), y=query.get("latitude")))
+                returntype = "geographies"
+                param_dict.update(dict(vintage=vintage))
 
             if searchtype == "address":
                 param_dict.update(
@@ -114,14 +116,19 @@ class USCensus:
                     )
                 )
 
+            print(request_url_base)
+            pprint.pprint(param_dict)
+
             resp = requests.get(request_url_base, params=param_dict)
+
+            print(resp)
 
             if resp.status_code == 200:
                 result = json.loads(resp.text).get("result")
 
                 if isinstance(result, dict):
                     address_matches = result.get("addressMatches")
-                    if address_matches and len(address_matches) > 0:
+                    if len(address_matches) > 0:
                         address_match = address_matches[0]
 
                         return_address = convert_keys(address_match.get("addressComponents"))
